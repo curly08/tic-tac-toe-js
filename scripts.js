@@ -1,10 +1,26 @@
+// Game
+
+const game = (() => {
+  // create players
+
+  // alternate turns
+
+  // declare win/draw
+
+  // play again?
+});
+
 // Gameboard
 
 const gameboard = (() => {
   const board = [];
 
   const addPiece = (piece, square) => {
-    board[square] = piece;
+    if (typeof board[square] === "undefined") {
+      board[square] = piece;
+    } else {
+      return 'failure';
+    };
   };
 
   const reset = () => {
@@ -17,3 +33,17 @@ const gameboard = (() => {
     reset
   };
 })();
+
+// Player
+
+const player = (name, piece) => {
+  // prompt to place piece
+  const playTurn = () => {
+    let square = prompt("Where do you want to place your piece?");
+    if (gameboard.addPiece(piece, square) === 'failure') {
+      playTurn();
+    };
+  };
+
+  return { name, piece, playTurn };
+};
