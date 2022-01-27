@@ -77,3 +77,19 @@ const game = (() => {
     };
   };
 });
+
+// display game
+
+const gameSection = document.getElementById("game-section");
+const matchup = document.getElementById("matchup");
+const startForm = document.getElementById("start-form");
+startForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const playerOne = player(startForm.elements.namedItem("player-one").value, 'X');
+  const playerTwo = player(startForm.elements.namedItem("player-two").value, 'O');
+  matchup.textContent = `${playerOne.name.toUpperCase()} versus ${playerTwo.name.toUpperCase()}`;
+  startForm.style.display = "none";
+  gameSection.style.display = "block";
+});
+
+// cell event listeners
