@@ -1,12 +1,8 @@
 const gameboard = (() => {
-  const board = [];
+  let board = [];
 
   const addPiece = (piece, square) => {
-    if (typeof board[square] === "undefined") {
-      board[square] = piece;
-    } else {
-      return 'failure';
-    };
+    board[square] = piece;
   };
 
   const reset = () => {
@@ -21,65 +17,74 @@ const gameboard = (() => {
 })();
 
 const player = (name, piece) => {
-  const playTurn = () => {
-    const square = prompt(`${name}, where do you want to place your piece?`);
-    if (parseInt(square) >= 1 && parseInt(square) <= 9 && gameboard.board[(parseInt(square) - 1)] === undefined) {
-      gameboard.addPiece(piece, (parseInt(square) - 1));
-    } else {
-      playTurn();
-    };
-  };
-
-  return { name, piece, playTurn };
+  return { name, piece };
 };
 
 const game = (() => {
-  const checkForDraw = (board) => {
-    if (board.length === 9 && !board.includes('undefined') && checkForWin(board) === false) {
-      gameStatus = 'draw';
-      alert(`It's a draw!`);
-    };  
+  const isValidAction = (cell) => {
+    if (cell.textContent === 'X' || cell.textContent === 'O') {
+      return false;
+    };
+
+    return true;
   };
 
-  const checkForWin = (board) => {
-    const winningScenarios = [
-      [board[0], board[1], board[2]],
-      [board[3], board[4], board[5]],
-      [board[6], board[7], board[8]],
-      [board[0], board[3], board[6]],
-      [board[1], board[4], board[7]],
-      [board[2], board[5], board[8]],
-      [board[0], board[4], board[8]],
-      [board[2], board[4], board[6]]
-    ];
+  const play = (playerOne, playerTwo) => {
+    let currentPlayer = playerOne;
+    let gameOver = false;
+    const result = document.getElementById('result');
+  
+    const checkForDraw = (board, currentPlayer) => {
+      if (board.length === 9 && !board.includes(undefined) && !checkForWin(board, currentPlayer)) {
+        gameOver = true;
+        result.textContent = "It's a draw!";
+      };  
+    };
+  
+    const checkForWin = (board, currentPlayer) => {
+      const winningScenarios = [
+        [board[0], board[1], board[2]],
+        [board[3], board[4], board[5]],
+        [board[6], board[7], board[8]],
+        [board[0], board[3], board[6]],
+        [board[1], board[4], board[7]],
+        [board[2], board[5], board[8]],
+        [board[0], board[4], board[8]],
+        [board[2], board[4], board[6]]
+      ];
+  
+      winningScenarios.forEach(scenario => {
+        if (scenario.every(square => square === currentPlayer.piece)) {
+          gameOver = true;
+          result.textContent = `Congrats ${currentPlayer.name}! You won!`;
+        } else {
+          return false;
+        };
+      });
+    };
 
-    winningScenarios.forEach(scenario => {
-      if (scenario.every(piece => piece === currentPlayer.piece)) {
-        gameStatus = 'win';
-        alert(`Congrats ${currentPlayer.name}! You won!`);
-      };
+    const changePlayer = () => {
+      currentPlayer = currentPlayer === playerOne ? playerTwo : playerOne;
+    };
+
+    const cells = document.getElementsByClassName("cell");
+    Array.prototype.forEach.call(cells, (cell) => {
+      cell.addEventListener('click', () => {
+        if (isValidAction(cell) && !gameOver) {
+          gameboard.addPiece(currentPlayer.piece, parseInt(cell.textContent) - 1);
+          cell.textContent = currentPlayer.piece;
+          checkForDraw(gameboard.board, currentPlayer);
+          checkForWin(gameboard.board, currentPlayer);
+          changePlayer();
+        };
+      });
     });
   };
 
-  const playerOne = player(prompt("Player one, what is your name?"), 'X');
-  const playerTwo = player(prompt("Player two, what is your name?"), 'O');
-  let currentPlayer = playerOne;
-  let gameStatus = 'not over';
+  return { play };
+})();
 
-  while (gameStatus === 'not over') {
-    currentPlayer.playTurn();
-    checkForWin(gameboard.board);
-    checkForDraw(gameboard.board);
-    if (currentPlayer === playerOne) {
-      currentPlayer = playerTwo;
-    } else {
-      currentPlayer = playerOne;
-    };
-  };
-});
-
-// display game
-
+// display game, create players, and start game
 const gameSection = document.getElementById("game-section");
 const matchup = document.getElementById("matchup");
 const startForm = document.getElementById("start-form");
@@ -90,6 +95,5 @@ startForm.addEventListener('submit', (event) => {
   matchup.textContent = `${playerOne.name.toUpperCase()} versus ${playerTwo.name.toUpperCase()}`;
   startForm.style.display = "none";
   gameSection.style.display = "block";
+  game.play(playerOne, playerTwo);
 });
-
-// cell event listeners
