@@ -134,3 +134,7 @@ input:focus {
 .no-right {
   border-right: none;
 }
+
+#play-again-btn {
+  display: none;
+}
